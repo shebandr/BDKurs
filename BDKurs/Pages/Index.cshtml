@@ -1,0 +1,63 @@
+﻿@page
+@model IndexModel
+
+
+<h2>Data from SQLite</h2>
+<div class="divButtonsTableChange">
+    <form method="post" class="formButtonSend">
+        <button type="submit" name="action" value="Members" class="buttonSend">Members</button>
+    </form>
+    <form method="post" class="formButtonSend">
+        <button type="submit" name="action" value="Trainers" class=" buttonSend">Trainers</button>
+    </form>
+    <form method="post" class="formButtonSend">
+        <button type="submit" name="action" value="Classes" class=" buttonSend">Classes</button>
+    </form>
+    <form method="post" class="formButtonSend">
+        <button type="submit" name="action" value="MemberClasses" class=" buttonSend">MemberClasses</button>
+    </form>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            @foreach (var header in Model.Headers)
+            {
+                <th>@header</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model.testList)
+        {
+            <tr>
+                @foreach (var cell in row)
+                {
+                    <td>@cell</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+<h2>Add New Record</h2>
+<form method="post" asp-page-handler="AddRecord">
+    <input type="hidden" name="Table" value="@Model.Table" />
+    @foreach (var header in Model.Headers)
+    {
+        @if ((header != "MemberID" && header != "TrainerID" && header != "ClassID" && header != "MemberClassID") || Model.Headers[0] != header)
+        {
+            <div class="form-group">
+                <label for="@header">@header</label>
+                @if (header == "BirthDate" || header == "StartTime")
+                {
+                    <input type="date" class="form-control" id="@header" name="@header" required>
+                }
+                else
+                {
+                    <input type="text" class="form-control" id="@header" name="@header" required>
+                }
+            </div>
+        }
+    }
+    <button type="submit" class="buttonSend">Add Record</button>
+</form>
+    
