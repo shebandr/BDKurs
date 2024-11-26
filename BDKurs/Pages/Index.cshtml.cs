@@ -8,7 +8,7 @@ namespace BDKurs.Pages
 {
     public class IndexModel : PageModel
     {
-        public List<List<string>> testList = new List<List<string>>();
+        public List<List<string>> TableList = new List<List<string>>();
         public List<string> Headers = new List<string>();
         private readonly ILogger<IndexModel> _logger;
         public string Table { get; set; } = "Members";
@@ -23,19 +23,18 @@ namespace BDKurs.Pages
             DBLib.InitializeDatabase();
 
             
-            testList = DBLib.GetFullTable(table);
+            TableList = DBLib.GetFullTable(table);
 
-            _logger.LogInformation("Data count: {Count}", testList.Count);
-            if (testList.Count > 0)
+            _logger.LogInformation("Data count: {Count}", TableList.Count);
+            if (TableList.Count > 0)
             {
-                Headers = testList[0];
-                testList.RemoveAt(0); 
+                Headers = TableList[0];
+                TableList.RemoveAt(0); 
             }
             else
             {
                 Headers = new List<string>();
             }
-            /*DBLib.AddNewRow("Members", new List<string> { "FirstName", "LastName", "BirthDate" }, new List<string> { "John", "Doe", "1985-05-15" });*/
         }
         public void OnPost(string action)
         {
@@ -46,30 +45,30 @@ namespace BDKurs.Pages
             switch (action)
             {
                 case "Members":
-                    testList = DBLib.GetFullTable("Members");
+                    TableList = DBLib.GetFullTable("Members");
                     break;
                 case "Trainers":
-                    testList = DBLib.GetFullTable("Trainers");
+                    TableList = DBLib.GetFullTable("Trainers");
                     break;
-                case "Classes":
-                    testList = DBLib.GetFullTable("Classes");
+                case "Trainings":
+                    TableList = DBLib.GetFullTable("Trainings");
                     break;
-                case "MemberClasses":
-                    testList = DBLib.GetFullTable("MemberClasses");
+                case "MemberTrainings":
+                    TableList = DBLib.GetFullTable("MemberTrainings");
                     break;
                 default:
-                    testList = DBLib.GetFullTable("Members");
+                    TableList = DBLib.GetFullTable("Members");
                     break;
             }
-            Headers = testList[0];
-
+            
+            Headers = TableList[0];
+            TableList.RemoveAt(0);
         }
         public IActionResult OnPostAddRecord()
         {
             Table = Request.Form["Table"];
-            // Получаем данные из формы
             Headers = DBLib.GetFullTable(Table)[0];
-            
+
             var formData = new Dictionary<string, string>();
             Console.WriteLine("НУ ТУТ ДОЛЖНО ЖЕ ЧТО-ТО ВЫВЕСТИСЬ");
             Console.WriteLine(Table);
@@ -81,11 +80,10 @@ namespace BDKurs.Pages
                     var value = Request.Form[header];
                     if (string.IsNullOrEmpty(value))
                     {
-                        ModelState.AddModelError(header, $"The {header} field is required.");
+                        ModelState.AddModelError(header, $"{header} поле необходимо.");
                     }
                     else if (header == "BirthDate" )
                     {
-                        // Преобразуем дату в формат yyyy-MM-dd HH:mm:ss
                         value = ConvertDateToSqlDateTime(value);
                     }
                     formData[header] = value;
@@ -93,36 +91,27 @@ namespace BDKurs.Pages
                 }
             }
 
-            // Проверка на ошибки валидации
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            // Вывод данных для отладки
             Console.WriteLine($"Selected Table: {Table}");
             Console.WriteLine($"Headers: {string.Join(", ", Headers)}");
             Console.WriteLine($"Data: {string.Join(", ", formData.Values)}");
 
-            // Вызываем функцию для добавления новой записи
             DBLib.AddNewRow(Table, Headers, new List<string>(formData.Values));
 
-            // Перенаправляем на страницу с обновленными данными
             return RedirectToPage();
         }
 
         public static string ConvertDateToSqlDateTime(string dateString)
         {
-            // Проверка на пустую строку
             if (string.IsNullOrEmpty(dateString))
             {
                 throw new ArgumentException("Date string cannot be null or empty.");
             }
-
-            // Преобразование строки в DateTime
             DateTime date = DateTime.Parse(dateString);
-
-            // Форматирование в формат yyyy-MM-dd HH:mm:ss
             return date.ToString("yyyy-MM-dd HH:mm:ss");
         }
     }

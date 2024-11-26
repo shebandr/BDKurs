@@ -11,10 +11,10 @@
         <button type="submit" name="action" value="Trainers" class=" buttonSend">Trainers</button>
     </form>
     <form method="post" class="formButtonSend">
-        <button type="submit" name="action" value="Classes" class=" buttonSend">Classes</button>
+        <button type="submit" name="action" value="Trainings" class=" buttonSend">Trainings</button>
     </form>
     <form method="post" class="formButtonSend">
-        <button type="submit" name="action" value="MemberClasses" class=" buttonSend">MemberClasses</button>
+        <button type="submit" name="action" value="MemberTrainings" class=" buttonSend">MemberTrainings</button>
     </form>
 </div>
 <table class="table">
@@ -27,7 +27,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var row in Model.testList)
+        @foreach (var row in Model.TableList)
         {
             <tr>
                 @foreach (var cell in row)
@@ -43,7 +43,7 @@
     <input type="hidden" name="Table" value="@Model.Table" />
     @foreach (var header in Model.Headers)
     {
-        @if ((header != "MemberID" && header != "TrainerID" && header != "ClassID" && header != "MemberClassID") || Model.Headers[0] != header)
+        @if ((header != "MemberID" && header != "TrainerID" && header != "TrainingID" && header != "MemberClassID") || Model.Headers[0] != header)
         {
             <div class="form-group">
                 <label for="@header">@header</label>

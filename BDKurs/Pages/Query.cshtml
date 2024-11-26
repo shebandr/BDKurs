@@ -1,0 +1,55 @@
+﻿@page
+@model QueryModel
+<div>
+	<div>
+		Первый запрос: Вывод всех занятий, тренеров и дней недели, где и когда занимается Екатерина Васильева
+	</div>
+	<form method="post">
+		<button class="buttonSend" value="1" name="QueryButton" type="submit">
+			Выполнить
+		</button>
+	</form>
+	<div>
+		Второй запрос: Вывод имен всех людей, у кого больше 1 тренировки в неделю
+	</div>
+	<form method="post">
+		<button class="buttonSend" value="2" name="QueryButton" type="submit">
+			Выполнить
+		</button>
+	</form>
+	<div>
+		Третий запрос: Вывод всех, кто ходит на тренировки в указанный день недели
+	</div>
+	<form method="post">
+		<div>
+			укажите день недели:
+		</div>
+		<input type="text" name="DayInput"/>
+		<button class="buttonSend" value="3" name="QueryButton" type="submit">
+			Выполнить
+		</button>
+	</form>
+	<table class="table">
+		<thead>
+			<tr>
+				@foreach (var header in Model.Headers)
+				{
+					<th>@header</th>
+				}
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var row in Model.Table)
+			{
+				<tr>
+					@foreach (var cell in row)
+					{
+						<td>@cell</td>
+					}
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	
+</div>

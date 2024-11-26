@@ -7,20 +7,15 @@ using System.Xml.Linq;
 
 public static class DBLib
 {
-    // Строка подключения к базе данных SQLite
     private static string connectionString = "Data Source=FC.db;Version=3;";
 
 
 
     public static void InitializeDatabase()
     {
-
-        // Создание базы данных и таблиц
         using (SQLiteConnection connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
-
-            // Создание таблицы Members (Участники)
             string createMembersTable = @"
                 CREATE TABLE IF NOT EXISTS Members (
                     MemberID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +26,6 @@ public static class DBLib
 
             ExecuteNonQuery(connection, createMembersTable);
 
-            // Создание таблицы Trainers (Тренеры)
             string createTrainersTable = @"
                 CREATE TABLE IF NOT EXISTS Trainers (
                     TrainerID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,11 +36,10 @@ public static class DBLib
 
             ExecuteNonQuery(connection, createTrainersTable);
 
-            // Создание таблицы Classes (Занятия)
             string createClassesTable = @"
-                CREATE TABLE IF NOT EXISTS Classes (
-                    ClassID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ClassName TEXT NOT NULL,
+                CREATE TABLE IF NOT EXISTS Trainings (
+                    TrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    TrainingName TEXT NOT NULL,
                     TrainerID INTEGER NOT NULL,
                     Day TEXT NOT NULL,
                     FOREIGN KEY (TrainerID) REFERENCES Trainers(TrainerID)
@@ -54,18 +47,17 @@ public static class DBLib
 
             ExecuteNonQuery(connection, createClassesTable);
 
-            // Создание таблицы MemberClasses (Участники занятий)
             string createMemberClassesTable = @"
-                CREATE TABLE IF NOT EXISTS MemberClasses (
+                CREATE TABLE IF NOT EXISTS MemberTrainings (
                     MemberClassID INTEGER PRIMARY KEY AUTOINCREMENT,
                     MemberID INTEGER NOT NULL,
-                    ClassID INTEGER NOT NULL,
+                    TrainingID INTEGER NOT NULL,
                     FOREIGN KEY (MemberID) REFERENCES Members(MemberID),
-                    FOREIGN KEY (ClassID) REFERENCES Classes(ClassID)
+                    FOREIGN KEY (TrainingID) REFERENCES Trainings(TrainingID)
                 );";
 
             ExecuteNonQuery(connection, createMemberClassesTable);
-            if (GetFullTable("Members").Count == 1 && GetFullTable("Trainers").Count == 1 && GetFullTable("Classes").Count == 1 && GetFullTable("MemberClasses").Count == 1)
+            if (GetFullTable("Members").Count == 1 && GetFullTable("Trainers").Count == 1 && GetFullTable("Trainings").Count == 1 && GetFullTable("MemberTrainings").Count == 1)
             {
                 SeedDatabase(connection);
             }
@@ -77,39 +69,58 @@ public static class DBLib
 
     private static void SeedDatabase(SQLiteConnection connection)
     {
-        // Заполнение таблицы Members
         string insertMembers = @"
             INSERT INTO Members (FirstName, LastName, BirthDate) VALUES
-            ('John', 'Doe', '1985-05-15'),
-            ('Jane', 'Smith', '1990-08-22'),
-            ('Alice', 'Johnson', '1988-11-30');";
+            ('Алексей', 'Смирнов', '1992-03-10'),
+            ('Екатерина', 'Васильева', '1987-07-18'),
+            ('Дмитрий', 'Козлов', '1995-11-25'),
+            ('Ольга', 'Николаева', '1980-09-05'),
+            ('Сергей', 'Морозов', '1998-04-30'),
+            ('Мария', 'Лебедева', '1983-12-12'),
+            ('Александр', 'Петров', '1991-06-20'),
+            ('Анна', 'Иванова', '1989-08-14'),
+            ('Игорь', 'Соколов', '1994-02-28'),
+            ('Татьяна', 'Федорова', '1986-10-07'),
+            ('Антон', 'Алексеев', '1988-11-30');";
 
         ExecuteNonQuery(connection, insertMembers);
 
-        // Заполнение таблицы Trainers
         string insertTrainers = @"
             INSERT INTO Trainers (FirstName, LastName, Specialization) VALUES
-            ('Michael', 'Brown', 'Yoga'),
-            ('Emily', 'Davis', 'Strength Training'),
-            ('David', 'Wilson', 'Pilates');";
+            ('Михаил', 'Новиков', 'Йога'),
+            ('Дмитрий', 'Дмитриев', 'Тяжелая атлетика'),
+            ('Олег', 'Антонов', 'Футбол'),
+            ('Роман', 'Кузьмин', 'Бокс'),
+            ('Денис', 'Денисов', 'Спортивная стрельба');";
 
         ExecuteNonQuery(connection, insertTrainers);
 
-        // Заполнение таблицы Classes
         string insertClasses = @"
-            INSERT INTO Classes (ClassName, TrainerID, Day) VALUES
-            ('Yoga Class', 1, 'Monday'),
-            ('Strength Training', 2, 'Sunday'),
-            ('Pilates', 3, 'Tuesday');";
+            INSERT INTO Trainings (TrainingName, TrainerID, Day) VALUES
+            ('Занятие йогой', 1, 'Понедельник'),
+            ('Силовые упражнения', 2, 'Вторник'),
+            ('Футбольная тренировка', 3, 'Среда'),
+            ('Секция Бокса', 4, 'Четверг'),
+            ('Тир', 5, 'Пятница'),
+            ('Тир', 5, 'Суббота');";
 
         ExecuteNonQuery(connection, insertClasses);
 
-        // Заполнение таблицы MemberClasses
         string insertMemberClasses = @"
-            INSERT INTO MemberClasses (MemberID, ClassID) VALUES
+            INSERT INTO MemberTrainings (MemberID, TrainingID) VALUES
             (1, 1),
-            (2, 2),
-            (3, 3);";
+            (2, 1),
+            (3, 2),
+            (4, 2),
+            (7, 2),
+            (6, 3),
+            (5, 4),
+            (8, 4),            
+            (9, 3),
+            (10, 4),
+            (11, 4),
+            (2, 5),
+            (3, 6);";
 
         ExecuteNonQuery(connection, insertMemberClasses);
     }
@@ -119,17 +130,13 @@ public static class DBLib
         {
             connection.Open();
 
-            // Формирование строки с именами столбцов
             columns.RemoveAt(0);
             string columnsString = string.Join(", ", columns);
 
-            // Формирование строки со значениями данных с экранированием
             string dataString = string.Join(", ", data.Select(d => $"'{d.Replace("'", "''")}'"));
 
-            // Формирование запроса
             string query = $"INSERT INTO {table} ({columnsString}) VALUES ({dataString});";
             Console.WriteLine(query);
-            // Выполнение запроса
             ExecuteNonQuery(connection, query);
         }
     }
@@ -143,9 +150,6 @@ public static class DBLib
         }
     }
 
-
-
-    // Метод для создания пустой таблицы
     public static void CreateTable()
     {
         using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -162,7 +166,6 @@ public static class DBLib
         }
     }
 
-    // Метод для выполнения произвольного SQL-запроса
     public static void ExecuteQuery(string query)
     {
         using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -215,10 +218,55 @@ public static class DBLib
         }
         catch (Exception ex)
         {
-            // Логирование ошибки или вывод в консоль
             Console.WriteLine($"Error: {ex.Message}");
         }
 
         return data;
     }
+
+
+    public static List<List<string>> ExecuteQueryWithReturn(string sql)
+    {
+        List<List<string>> data = new List<List<string>>();
+
+        try
+        {
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+                {
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        List<string> fieldNames = new List<string>();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            fieldNames.Add(reader.GetName(i));
+                        }
+                        data.Add(fieldNames);
+                        while (reader.Read())
+                        {
+                            List<string> rowData = new List<string>();
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                rowData.Add(reader[i].ToString());
+                            }
+
+                            data.Add(rowData);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+
+        return data;
+    }
+
+
 }
