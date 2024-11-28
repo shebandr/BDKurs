@@ -43,7 +43,7 @@
     <input type="hidden" name="Table" value="@Model.Table" />
     @foreach (var header in Model.Headers)
     {
-        @if ((header != "MemberID" && header != "TrainerID" && header != "TrainingID" && header != "MemberClassID") || Model.Headers[0] != header)
+        @if ((header != "MemberID" && header != "TrainerID" && header != "TrainingID" && header != "MemberTrainingID") || Model.Headers[0] != header)
         {
             <div class="form-group">
                 <label for="@header">@header</label>

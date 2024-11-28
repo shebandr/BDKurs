@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 public static class DBLib
 {
-    private static string connectionString = "Data Source=FC.db;Version=3;";
+    private static string connectionString = "Data Source=FC.sql;Version=3;";
 
 
 
@@ -36,7 +36,7 @@ public static class DBLib
 
             ExecuteNonQuery(connection, createTrainersTable);
 
-            string createClassesTable = @"
+            string createTrainingsTable = @"
                 CREATE TABLE IF NOT EXISTS Trainings (
                     TrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
                     TrainingName TEXT NOT NULL,
@@ -45,18 +45,18 @@ public static class DBLib
                     FOREIGN KEY (TrainerID) REFERENCES Trainers(TrainerID)
                 );";
 
-            ExecuteNonQuery(connection, createClassesTable);
+            ExecuteNonQuery(connection, createTrainingsTable);
 
-            string createMemberClassesTable = @"
+            string createMemberTrainingsTable = @"
                 CREATE TABLE IF NOT EXISTS MemberTrainings (
-                    MemberClassID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    MemberTrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
                     MemberID INTEGER NOT NULL,
                     TrainingID INTEGER NOT NULL,
                     FOREIGN KEY (MemberID) REFERENCES Members(MemberID),
                     FOREIGN KEY (TrainingID) REFERENCES Trainings(TrainingID)
                 );";
 
-            ExecuteNonQuery(connection, createMemberClassesTable);
+            ExecuteNonQuery(connection, createMemberTrainingsTable);
             if (GetFullTable("Members").Count == 1 && GetFullTable("Trainers").Count == 1 && GetFullTable("Trainings").Count == 1 && GetFullTable("MemberTrainings").Count == 1)
             {
                 SeedDatabase(connection);
@@ -95,7 +95,7 @@ public static class DBLib
 
         ExecuteNonQuery(connection, insertTrainers);
 
-        string insertClasses = @"
+        string insertTrainings = @"
             INSERT INTO Trainings (TrainingName, TrainerID, Day) VALUES
             ('Занятие йогой', 1, 'Понедельник'),
             ('Силовые упражнения', 2, 'Вторник'),
@@ -104,9 +104,9 @@ public static class DBLib
             ('Тир', 5, 'Пятница'),
             ('Тир', 5, 'Суббота');";
 
-        ExecuteNonQuery(connection, insertClasses);
+        ExecuteNonQuery(connection, insertTrainings);
 
-        string insertMemberClasses = @"
+        string insertMemberTrainings = @"
             INSERT INTO MemberTrainings (MemberID, TrainingID) VALUES
             (1, 1),
             (2, 1),
@@ -122,7 +122,7 @@ public static class DBLib
             (2, 5),
             (3, 6);";
 
-        ExecuteNonQuery(connection, insertMemberClasses);
+        ExecuteNonQuery(connection, insertMemberTrainings);
     }
         public static void AddNewRow(string table, List<string> columns, List<string> data)
     {
