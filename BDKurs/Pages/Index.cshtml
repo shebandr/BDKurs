@@ -1,5 +1,13 @@
 ﻿@page
 @model IndexModel
+<script>
+    var headers = @Html.Raw(Json.Serialize(Model.Headers));
+    var MembersTable = @Html.Raw(Json.Serialize(Model.MembersTable));
+    var TrainersTable = @Html.Raw(Json.Serialize(Model.TrainersTable));
+    var TrainingsTable = @Html.Raw(Json.Serialize(Model.TrainingsTable));
+    var MemberTrainingsTable = @Html.Raw(Json.Serialize(Model.MemberTrainingsTable));
+    var tableList = @Html.Raw(Json.Serialize(Model.TableList));
+</script>
 
 
 <h2>Data from SQLite</h2>
@@ -38,15 +46,17 @@
         }
     </tbody>
 </table>
+
+
 <h2>Add New Record</h2>
-<form method="post" asp-page-handler="AddRecord">
+<form method="post" asp-page-handler="AddRecord" id="SendData">
     <input type="hidden" name="Table" value="@Model.Table" />
     @foreach (var header in Model.Headers)
     {
         @if ((header != "MemberID" && header != "TrainerID" && header != "TrainingID" && header != "MemberTrainingID") || Model.Headers[0] != header)
         {
             <div class="form-group">
-                <label for="@header">@header</label>
+                <label for="@header">@header</label> <label id="@header Error" class="LabelError"></label>
                 @if (header == "BirthDate" || header == "StartTime")
                 {
                     <input type="date" class="form-control" id="@header" name="@header" required>
@@ -58,6 +68,7 @@
             </div>
         }
     }
-    <button type="submit" class="buttonSend">Add Record</button>
+    <button id="buttonSendForm" class="buttonSend">Add Record</button>
+    <label id="GlobalError" class="LabelError"></label>
 </form>
     

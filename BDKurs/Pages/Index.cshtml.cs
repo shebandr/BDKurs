@@ -8,7 +8,8 @@ namespace BDKurs.Pages
 {
     public class IndexModel : PageModel
     {
-        public List<List<string>> TableList = new List<List<string>>();
+        public List<string> Errors = new List<string>();
+        
         public List<string> Headers = new List<string>();
         private readonly ILogger<IndexModel> _logger;
         public string Table { get; set; } = "Members";
@@ -17,12 +18,20 @@ namespace BDKurs.Pages
         {
             _logger = logger;
         }
+        public List<List<string>> TableList = new List<List<string>>();
+        public List<List<string>> MembersTable = new List<List<string>>();
+        public List<List<string>> TrainersTable = new List<List<string>>();
+        public List<List<string>> TrainingsTable = new List<List<string>>();
+        public List<List<string>> MemberTrainingsTable = new List<List<string>>();
 
         public void OnGet()
         {
             DBLib.InitializeDatabase();
 
-            
+            MembersTable = DBLib.GetFullTable("Members");
+            TrainersTable = DBLib.GetFullTable("Trainers");
+            TrainingsTable = DBLib.GetFullTable("Trainings");
+            MemberTrainingsTable = DBLib.GetFullTable("MemberTrainings");
             TableList = DBLib.GetFullTable(table);
 
             _logger.LogInformation("Data count: {Count}", TableList.Count);
@@ -60,52 +69,63 @@ namespace BDKurs.Pages
                     TableList = DBLib.GetFullTable("Members");
                     break;
             }
-            
+            MembersTable = DBLib.GetFullTable("Members");
+            TrainersTable = DBLib.GetFullTable("Trainers");
+            TrainingsTable = DBLib.GetFullTable("Trainings");
+            MemberTrainingsTable = DBLib.GetFullTable("MemberTrainings");
             Headers = TableList[0];
             TableList.RemoveAt(0);
         }
-        public IActionResult OnPostAddRecord()
-        {
-            Table = Request.Form["Table"];
-            Headers = DBLib.GetFullTable(Table)[0];
+		public IActionResult OnPostAddRecord()
+		{
+            Console.WriteLine(Errors.Count);
+            Errors = new List<string>();
 
-            var formData = new Dictionary<string, string>();
-            Console.WriteLine("НУ ТУТ ДОЛЖНО ЖЕ ЧТО-ТО ВЫВЕСТИСЬ");
-            Console.WriteLine(Table);
-            Console.WriteLine(Headers.Count);
-            foreach (var header in Headers)
-            {
-                if (Headers[0] != header)
-                {
-                    var value = Request.Form[header];
-                    if (string.IsNullOrEmpty(value))
-                    {
-                        ModelState.AddModelError(header, $"{header} поле необходимо.");
-                    }
-                    else if (header == "BirthDate" )
-                    {
-                        value = ConvertDateToSqlDateTime(value);
-                    }
-                    formData[header] = value;
-                    Console.WriteLine($"{header} {formData[header]}");
-                }
+
+			Table = Request.Form["Table"];
+			Headers = DBLib.GetFullTable(Table)[0];
+
+			var formData = new Dictionary<string, string>();
+			Console.WriteLine(Table);
+			Console.WriteLine(Headers.Count);
+
+			foreach (var header in Headers)
+			{
+				if (Headers[0] != header)
+				{
+					var value = Request.Form[header];
+					if (string.IsNullOrWhiteSpace(value) || string.IsNullOrEmpty(value))
+					{
+                        Errors.Add(header +  " поле не должно быть пустым");
+					}
+					else
+					{
+						if (header == "BirthDate")
+						{
+							value = ConvertDateToSqlDateTime(value);
+						}
+
+						formData[header] = value;
+						Console.WriteLine($"{header} {formData[header]}");
+					}
+				}
+			}
+            Console.WriteLine(ModelState.IsValid);
+
+			if (Errors.Count != 0)
+			{
+                return RedirectToPage();
             }
 
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+			Console.WriteLine($"Selected Table: {Table}");
+			Console.WriteLine($"Headers: {string.Join(", ", Headers)}");
+			Console.WriteLine($"Data: {string.Join(", ", formData.Values)}");
 
-            Console.WriteLine($"Selected Table: {Table}");
-            Console.WriteLine($"Headers: {string.Join(", ", Headers)}");
-            Console.WriteLine($"Data: {string.Join(", ", formData.Values)}");
+			DBLib.AddNewRow(Table, Headers, new List<string>(formData.Values));
 
-            DBLib.AddNewRow(Table, Headers, new List<string>(formData.Values));
-
-            return RedirectToPage();
-        }
-
-        public static string ConvertDateToSqlDateTime(string dateString)
+			return RedirectToPage();
+		}
+		public static string ConvertDateToSqlDateTime(string dateString)
         {
             if (string.IsNullOrEmpty(dateString))
             {

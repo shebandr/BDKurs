@@ -16,45 +16,51 @@ public static class DBLib
         using (SQLiteConnection connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
-            string createMembersTable = @"
-                CREATE TABLE IF NOT EXISTS Members (
-                    MemberID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    FirstName TEXT NOT NULL,
-                    LastName TEXT NOT NULL,
-                    BirthDate DATE NOT NULL
-                );";
+			 using (SQLiteCommand pragmaCommand = new SQLiteCommand("PRAGMA foreign_keys = ON;", connection))
+        {
+            pragmaCommand.ExecuteNonQuery();
+        }
 
-            ExecuteNonQuery(connection, createMembersTable);
+        string createMembersTable = @"
+            CREATE TABLE IF NOT EXISTS Members (
+                MemberID INTEGER PRIMARY KEY AUTOINCREMENT,
+                FirstName TEXT NOT NULL,
+                LastName TEXT NOT NULL,
+                BirthDate DATE NOT NULL
+            );";
 
-            string createTrainersTable = @"
-                CREATE TABLE IF NOT EXISTS Trainers (
-                    TrainerID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    FirstName TEXT NOT NULL,
-                    LastName TEXT NOT NULL,
-                    Specialization TEXT NOT NULL
-                );";
+        ExecuteNonQuery(connection, createMembersTable);
 
-            ExecuteNonQuery(connection, createTrainersTable);
+        string createTrainersTable = @"
+            CREATE TABLE IF NOT EXISTS Trainers (
+                TrainerID INTEGER PRIMARY KEY AUTOINCREMENT,
+                FirstName TEXT NOT NULL,
+                LastName TEXT NOT NULL,
+                Specialization TEXT NOT NULL
+            );";
 
-            string createTrainingsTable = @"
-                CREATE TABLE IF NOT EXISTS Trainings (
-                    TrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    TrainingName TEXT NOT NULL,
-                    TrainerID INTEGER NOT NULL,
-                    Day TEXT NOT NULL,
-                    FOREIGN KEY (TrainerID) REFERENCES Trainers(TrainerID)
-                );";
+        ExecuteNonQuery(connection, createTrainersTable);
 
-            ExecuteNonQuery(connection, createTrainingsTable);
+        string createTrainingsTable = @"
+            CREATE TABLE IF NOT EXISTS Trainings (
+                TrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
+                TrainingName TEXT NOT NULL,
+                TrainerID INTEGER NOT NULL,
+                Day TEXT NOT NULL,
+                FOREIGN KEY (TrainerID) REFERENCES Trainers(TrainerID)
+            );";
 
-            string createMemberTrainingsTable = @"
-                CREATE TABLE IF NOT EXISTS MemberTrainings (
-                    MemberTrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
-                    MemberID INTEGER NOT NULL,
-                    TrainingID INTEGER NOT NULL,
-                    FOREIGN KEY (MemberID) REFERENCES Members(MemberID),
-                    FOREIGN KEY (TrainingID) REFERENCES Trainings(TrainingID)
-                );";
+        ExecuteNonQuery(connection, createTrainingsTable);
+
+        string createMemberTrainingsTable = @"
+            CREATE TABLE IF NOT EXISTS MemberTrainings (
+                MemberTrainingID INTEGER PRIMARY KEY AUTOINCREMENT,
+                MemberID INTEGER NOT NULL,
+                TrainingID INTEGER NOT NULL,
+                FOREIGN KEY (MemberID) REFERENCES Members(MemberID),
+                FOREIGN KEY (TrainingID) REFERENCES Trainings(TrainingID)
+            );";
+
 
             ExecuteNonQuery(connection, createMemberTrainingsTable);
             if (GetFullTable("Members").Count == 1 && GetFullTable("Trainers").Count == 1 && GetFullTable("Trainings").Count == 1 && GetFullTable("MemberTrainings").Count == 1)

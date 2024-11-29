@@ -25,6 +25,7 @@ namespace BDKurs.Pages
         {
 
             Console.WriteLine($"Button clicked: {QueryButton}");
+            
             int query = Int32.Parse(QueryButton);
             string Day = "";
 

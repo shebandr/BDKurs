@@ -38,3 +38,7 @@ body {
 .divButtonsTableChange {
 
 }
+
+.LabelError {
+    color: red;
+}

@@ -20,12 +20,13 @@
 	<div>
 		Третий запрос: Вывод всех, кто ходит на тренировки в указанный день недели
 	</div>
-	<form method="post">
+	<form method="post" id="Query3">
 		<div>
 			укажите день недели:
 		</div>
-		<input type="text" name="DayInput"/>
-		<button class="buttonSend" value="3" name="QueryButton" type="submit">
+		<input type="text" name="DayInput" id="DayInput" />
+		<label id="DayInputError"></label>
+		<button value="3" name="QueryButton" class="buttonSend" type="submit">
 			Выполнить
 		</button>
 	</form>
